@@ -4,9 +4,11 @@ import (
 	"bytes"
 	"flag"
 	"fmt"
+	"io" // use io.Writer interface
 	"io/ioutil"
 	"os"
-	"path/filepath"
+
+	// "path/filepath"
 
 	bm "github.com/microcosm-cc/bluemonday"
 	bf "github.com/russross/blackfriday/v2"
@@ -29,7 +31,7 @@ const (
 // coordinate the execution of the remaining functions
 // returns a potential error
 // main uses the return value to decide whether to exit with an error code.
-func run(filename string) error {
+func run(filename string, out io.Writer) error {
 	// reads the content of the input md file into a slice of bytes
 	input, err := ioutil.ReadFile(filename)
 	if err != nil {
@@ -39,9 +41,21 @@ func run(filename string) error {
 	// responsible for converting md to html (bf uses here)
 	htmlData := parseContent(input)
 
-	outName := fmt.Sprintf("%s.html", filepath.Base(filename)) // file.md.html
+	// make tmp and check for errors
+	temp, err := ioutil.TempFile("", "mdv-*.html")
+	if err != nil {
+		return err
+	}
+	if err := temp.Close(); err != nil {
+		return err
+	}
 
-	fmt.Println(outName)
+	// outName := fmt.Sprintf("%s.html", filepath.Base(filename)) // file.md.html
+	outName := temp.Name() ///tmp/mdv-2227813109.html
+
+	// Fprintln(w io.Writer, a ...any) (n int, err error)
+	// prints the remaining arguments to that interface.
+	fmt.Fprintln(out, outName)
 
 	// returns a potential error when writing the HTML file,
 	// !!! which the run() also returns as its error.
@@ -93,7 +107,8 @@ func main() {
 
 	// main uses run() return value to decide whether to exit with an error code.
 	// run() itself uses saveHTML() return value
-	if err := run(*filename); err != nil {
+	// run(filename string, out io.Writer) error
+	if err := run(*filename, os.Stdout); err != nil {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}

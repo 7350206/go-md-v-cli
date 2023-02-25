@@ -43,6 +43,34 @@ For that case 2 files will be used: `test1.md` and `test1.md.html`.
 It’s a good practice to put all files required by tests in a subdirectory  called `testdata` under project’s dir.   
 The `testdata` directory has a special meaning in Go tooling that’s ignored by the Go build tool when compiling your program.
 
+### temp files
+to run safely concurrently because the file names will never clash.  
+`ioutil.TempFile` takes 2 args. 
+- 1st is the directory where you create the file. if left blank, it uses the system-defined temporary directory. 
+- 2nd is a pattern that helps generate file names that are easier to find if desired. 
+
+To add that - edit `run()`
+
+### Using Interfaces to Automate Tests
+Sometimes is needed a way to test output printed out to STDOUT.  
+name of the output file is created dynamically, func prints this value to the screen, so file can be used.  
+but to automate tests, need to capture this output from within the test case.
+
+idiomatic way to deal with this is by using interfaces, in this case `io.Writer`, to make code more flexible.
+
+update the func `run()` so it will take the interface as an input parameter.  
+so can call `run()` with different types that implement the interface depending on the situation:  
+- for the program, use `os.Stdout` to print the output onscreen; 
+- for the tests, use `bytes.Buffer` to capture the output in a buffer that can be used in test.
+
+Once the `run()` has been changed, update the tests to use the `io.Writer` interface.  
+- hardcoded result no needed anymore
+
+
+
+
+
+
 
 
 
