@@ -45,7 +45,8 @@ func TestRun(t *testing.T) {
 	var mockStdOut bytes.Buffer
 
 	// pass address to implement io.Writer (method Write has pointer receiver)
-	if err := run(inputFile, &mockStdOut); err != nil {
+	// set skipPreview = true
+	if err := run(inputFile, &mockStdOut, true); err != nil {
 		t.Fatal(err)
 	}
 
