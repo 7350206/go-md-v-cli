@@ -4,6 +4,7 @@ import (
 	"bytes"     //// manipulate raw byte data
 	"io/ioutil" // read data from files ?? deprecated 1.16
 	"os"
+	"strings"
 
 	//// delete files
 	"testing"
@@ -12,7 +13,7 @@ import (
 const (
 	inputFile  = "./testdata/test1.md"
 	goldenFile = "./testdata/test1.md.html"
-	resultFile = "test1.md.html"
+	// resultFile = "test1.md.html"
 )
 
 // unit
@@ -37,10 +38,21 @@ func TestParseContent(t *testing.T) {
 }
 
 // integrated
+// use the bytes.Buffer to capture the output file name,
+// and use it as the resultFile,
 func TestRun(t *testing.T) {
-	if err := run(inputFile); err != nil {
+
+	var mockStdOut bytes.Buffer
+
+	// pass address to implement io.Writer (method Write has pointer receiver)
+	if err := run(inputFile, &mockStdOut); err != nil {
 		t.Fatal(err)
 	}
+
+	// define resultFile here
+	// get the value out of the buffer by using its String method
+	// and TrimSpace() to remove the '\n at the end of it.
+	resultFile := strings.TrimSpace(mockStdOut.String())
 
 	result, err := ioutil.ReadFile(resultFile) // test1.md.html
 	if err != nil {
