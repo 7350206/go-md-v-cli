@@ -1,4 +1,4 @@
-### Markdown View tool - md-view  
+### Markdown View tool - md-view [] 
 `mdv` accept the md file name to be previewed as argument.  
 will perform :
 - read content md file
@@ -66,6 +66,36 @@ so can call `run()` with different types that implement the interface depending 
 Once the `run()` has been changed, update the tests to use the `io.Writer` interface.  
 - hardcoded result no needed anymore
 
+### preview 
+most ppl want this feature, but it’s nice to provide an option to disable it in case they prefer to open the file at a different time. As part of this implementation, add another flag `-s` (skip-preview) to skip the auto-preview. This also helps with executing the tests by avoiding automatically opening the files in the browser for every test.
+
+add another func `preview()`
+
+### Cleaning Up Temporary Files
+```go
+pl@hp:~/Desktop/proj/go/go_cli/md-v$ `./mdv -file ./notes.md `
+/tmp/mdv-2880247582.html
+pl@hp:~/Desktop/proj/go/go_cli/md-v$ `ll /tmp/|grep mdv`
+-rw-------  1 pl   pl     4109 Feb 25 17:55 mdv-1718708031.html
+-rw-------  1 pl   pl     5539 Feb 25 19:42 mdv-1817550996.html
+-rw-------  1 pl   pl      383 Feb 25 16:35 mdv-2227813109.html
+-rw-------  1 pl   pl     5539 Feb 25 19:42 mdv-2382655289.html
+-rw-------  1 pl   pl     5539 Feb 25 20:09 mdv-2880247582.html
+-rw-------  1 pl   pl     5106 Feb 25 18:50 mdv-2903522283.html
+-rw-------  1 pl   pl     5106 Feb 25 18:57 mdv-3434389811.html
+
+```
+need to delete the temporary files to keep the system clean
+
+use the `os.Remove` to delete the files when they’re no longer needed. In general, `defer` the call to this function using the `defer` statement to ensure the file is deleted when the current function returns.
+
+another benefit of using the run function; 
+since it returns a value, instead of relying on os.Exit to exit,
+can safely use the `defer` statement to clean up the resources.  
+By deleting the file automatically, introduce a `small race condition`:
+the browser may not have time to open the file before it gets deleted.
+can solve this in different ways, but to keep things simple, 
+add a small delay to the `preview()` before it returns,
 
 
 
